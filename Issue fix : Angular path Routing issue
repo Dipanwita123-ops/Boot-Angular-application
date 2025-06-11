@@ -1,1 +1,77 @@
+Issue : while adding routing parameter (eg name) to the welcome component  i.e http://localhost:4200/welcome/Dipanwita , Angular wasnt matching to the name ..It was working fine until 
+http://localhost:4200/welcome but not with name   /Dipanwita .. was directly going into errorpage since wildcard('**') i.e Errorcomponent is present .
+
+# Redirecting to the error page when you access /welcome/Dipanwita
+
+🔍 What’s likely happening:
+If /welcome/Dipanwita goes to the ErrorComponent, then that means:
+
+Angular does not recognize /welcome/Dipanwita as matching any route
+
+So it goes to the catch-all route: { path: '**', component: ErrorComponent }
+
+##  WHAT FIXED THE ISSUE...
+==> Initially, your route welcome/:name was not working — the app was redirecting to the wildcard route (** → ErrorComponent) when visiting /welcome/Dipanwita.
+You commented out the wildcard route — then /welcome/Dipanwita started working.
+Later, you re-enabled the wildcard route and found that everything still worked fine.
+
+🧠 Why It Failed Before — and Why It Works Now
+This is a classic case of Angular route recognition not updating due to stale builds or development server issues.
+
+Likely Reasons It Failed Earlier:
+Build Cache or Stale Compilation:
+
+Angular sometimes serves a cached version of your app.
+
+Your route change (welcome/:name) may not have been recognized until you forced the rebuild (e.g., by changing the routing config, commenting/uncommenting routes).
+
+Router Order Not Updated in Runtime:
+
+Angular matches routes in the order they appear in the Routes array.
+
+If there was a syntax issue or a previously incorrect route setup, Angular may have fallen back to ** prematurely.
+
+Page Refresh or Direct Access to Deep Links:
+
+When you typed /welcome/Dipanwita directly in the browser, the dev server may not have been ready to handle that route correctly.
+
+✅ Why It's Working Now
+When you:
+
+Commented out the wildcard route
+
+Reloaded the app
+
+Then added it back
+
+...you triggered a fresh rebuild of the routing configuration.
+
+So now:
+Angular sees and correctly prioritizes welcome/:name before hitting **
+
+The development server (ng serve) is properly set up to return index.html for deep links
+
+✅ Lesson and Best Practices
+| Best Practice                                          | Why                                                   |
+| ------------------------------------------------------ | ----------------------------------------------------- |
+| Always keep wildcard route at the end                  | Prevents it from catching valid routes too early      |
+| Restart dev server after major route changes           | Forces Angular to rebuild routing table correctly     |
+| Clear cache or use incognito when routes don’t work    | To avoid browser caching or stale JS bundles          |
+| Use `<base href="/">` in `index.html`                  | Ensures deep links resolve properly                   |
+| For production: configure server for deep link support | So `/welcome/:name` works on refresh or direct access |
+
+
+✅ Conclusion
+The route issue wasn’t caused directly by the wildcard path — it was a side effect of Angular not fully rebuilding or recognizing your updated route definitions until you made a structural change (like commenting out a route).
+
+Now that Angular’s routing table is correctly rebuilt and the server is handling requests as expected, your wildcard and parameterized routes work together just fine.
+
+
+
+✅ Possible Solution
+1. Fix the Order of Routes (Most Important)
+Move the ** wildcard route to the end, and make sure welcome/:name is above it.
+
+
+
 
