@@ -1,1 +1,126 @@
+## In Angular, bootstrapping refers to the process of initializing or starting your Angular application by connecting the Root Module (AppModule) to the Root Component (AppComponent) and rendering it in the browser.
+
+🔹 1. What is Bootstrapping?
+Bootstrapping in Angular is the process where Angular:
+
+Loads the Root Module (usually AppModule)
+
+Compiles it
+
+Creates an instance of the Root Component (usually AppComponent)
+
+Inserts it into the DOM
+
+🔹 3. How Bootstrapping is Done (Step-by-Step)
+Step 1: main.ts triggers bootstrapping
+platformBrowserDynamic().bootstrapModule(AppModule)
+
+Tells Angular to start with AppModule.
+
+Angular compiles the module and starts the app.
+
+Step 2: AppModule defines the root component
+@NgModule({
+  declarations: [AppComponent, ...],
+  imports: [...],
+  bootstrap: [AppComponent] // <- THIS IS THE ROOT COMPONENT
+})
+export class AppModule {}
+
+The bootstrap array tells Angular which component to render first.
+
+Here it's AppComponent.
+
+Step 3: AppComponent is loaded into index.html
+<!-- index.html -->
+<body>
+  <app-root></app-root> <!-- Placeholder for AppComponent -->
+</body>
+Angular replaces <app-root> with the actual HTML rendered by AppComponent.
+
+Step 4: Internals (Simplified)
+Angular's compiler parses AppModule.
+
+Creates a component tree starting with AppComponent.
+
+Inserts rendered HTML into the DOM.
+
+Attaches change detection and other core services.
+
+🔹 4. Internally – What Happens Behind the Scenes
+platformBrowserDynamic().bootstrapModule(AppModule)
+
+Under the hood:
+
+Angular compiles AppModule and all declared components.
+
+It creates the root injector (dependency injection system).
+
+Angular creates and initializes the AppComponent.
+
+Angular looks for <app-root> in index.html.
+
+Angular replaces <app-root> with the rendered content of AppComponent.
+
+Now the app is running and listening for user interactions or route changes.
+
+Let's look exactly where and how Angular inserts the root component (AppComponent) into the DOM. This happens in two connected places:
+
+✅ 1. Placeholder in index.html
+This is the only static HTML file in an Angular project.
+
+<!-- src/index.html -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>MyApp</title>
+  </head>
+  <body>
+    <app-root></app-root> <!-- 👈 THIS is the placeholder -->
+  </body>
+</html>
+The <app-root> tag is a custom HTML element created by Angular.
+
+Angular searches for this tag and replaces it with the rendered HTML of AppComponent.
+
+2. Selector in AppComponent
+Inside your root component (usually app.component.ts), you define this tag:
+
+// src/app/app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',         // 👈 Matches the tag in index.html
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent {
+  title = 'MyApp';
+}
+The selector: 'app-root' tells Angular to look for the <app-root> tag in index.html.
+
+Angular replaces it with the compiled template of AppComponent.
+3. How Angular Finds & Inserts It Internally
+When Angular bootstraps the module:
+platformBrowserDynamic().bootstrapModule(AppModule)
+
+It sees the bootstrap: [AppComponent] line in AppModule.
+
+Angular looks for the selector of AppComponent (app-root).
+
+In index.html, Angular finds <app-root></app-root>.
+
+Angular replaces it with the compiled HTML from app.component.html.
+
+So, to directly answer:
+"Where in the code is the root component inserted into the DOM?"
+
+➡️ It's implicitly done by Angular at runtime:
+
+<app-root> in index.html is your placeholder.
+
+The selector: 'app-root' in AppComponent tells Angular what to inject there.
+
+Angular replaces that tag during bootstrapping.
 
