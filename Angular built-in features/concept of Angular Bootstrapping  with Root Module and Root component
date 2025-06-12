@@ -124,3 +124,51 @@ The selector: 'app-root' in AppComponent tells Angular what to inject there.
 
 Angular replaces that tag during bootstrapping.
 
+✅ What Is the DOM?
+DOM stands for Document Object Model.
+
+Think of it as a tree-like structure that your browser creates from your HTML. It allows JavaScript (and Angular) to dynamically read, add, change, or delete elements in your web page.
+
+Example:<!-- index.html -->
+<body>
+  <app-root></app-root>  <!-- This is part of the DOM -->
+</body>
+The browser turns that into a DOM tree where each tag becomes a node.
+
+✅ What Does "Inserted into the DOM" Mean?
+It means that Angular:
+
+Finds the placeholder element in index.html (<app-root>).
+
+Creates an instance of your root component (AppComponent).
+
+Compiles its template (like app.component.html).
+
+Replaces the placeholder (<app-root>) with the generated HTML from the component.
+
+Example
+Before Angular Bootstraps
+<body>
+  <app-root></app-root>
+</body>
+After Angular Bootstraps (AppComponent has this template:)
+
+<!-- app.component.html -->
+<h1>Welcome to MyApp!</h1>
+
+Then the DOM becomes:
+
+<body>
+  <app-root>
+    <h1>Welcome to MyApp!</h1> <!-- Inserted by Angular -->
+  </app-root>
+</body>
+This <h1> is now part of the live DOM — what the user sees and interacts with.
+
+✅ Why Is It Important?
+It’s how Angular renders content dynamically.
+
+Without inserting components into the DOM, nothing would appear on screen.
+
+Angular can update the DOM reactively when data or state changes.
+
