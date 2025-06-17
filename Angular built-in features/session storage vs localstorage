@@ -1,1 +1,59 @@
+🧠 What Are sessionStorage and localStorage?
+Both sessionStorage and localStorage are Web Storage APIs provided by the browser to store data on the client side (in the user's browser).
+
+They are like mini-databases stored in the browser memory, and they persist information in key-value format.
+
+| Feature            | `sessionStorage`                       | `localStorage`                     |
+| ------------------ | -------------------------------------- | ---------------------------------- |
+| Persistence        | Only while the **browser tab** is open | **Forever** until manually cleared |
+| Scope              | **Per tab**                            | Shared across all tabs/windows     |
+| Storage size limit | \~5 MB                                 | \~5–10 MB                          |
+| Use case           | Temporary data like login session      | Persistent data like preferences   |
+
+preferences
+
+🛠️ How to Use Them
+Both use simple key-value storage, and everything is stored as strings.
+
+🔐 Storing a value
+localStorage.setItem("username", "Dipanwita");
+sessionStorage.setItem("authenticatedUser", "Dipanwita");
+
+ Retrieving a value
+let name = localStorage.getItem("username");
+let user = sessionStorage.getItem("authenticatedUser");
+
+✅ Example in Angular
+In your HardcodedAuthenticationService, you're using:
+
+sessionStorage.setItem('authenticatedUser', username);
+This means:
+
+=====> When user logs in successfully, their username is stored in browser memory for the current tab session.
+
+======> If they close the tab, the data is gone (automatic logout behavior).
+
+=======> If they enter wrong password then sessionStorage does not set the username hence isUserLoggedIn() returns false
+
+You check if they're logged in with:
+
+isUserLoggedIn(){
+
+  let user = sessionStorage.getItem('authenticatedUser') 
+  return !(user===null)
+
+}
+
+This returns true if the user is still logged in.
+
+
+
+When Should You Use Which?
+
+| Scenario                                     | Use              |
+| -------------------------------------------- | ---------------- |
+| Temporary login session for current tab only | `sessionStorage` |
+| Remembering user settings between visits     | `localStorage`   |
+| Caching small data for offline usage         | `localStorage`   |
+| Preventing data sharing across tabs          | `sessionStorage` |
 
