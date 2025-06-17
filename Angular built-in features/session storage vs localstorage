@@ -3,6 +3,10 @@ Both sessionStorage and localStorage are Web Storage APIs provided by the browse
 
 They are like mini-databases stored in the browser memory, and they persist information in key-value format.
 
+Note: YOU CAN ONLY ACCESS DATA FROM LOCAL/SESSION STORAGE THAT WAS SET FROM YOUR WEBSITE
+      VALUES SET INTO LOCAL STORAGE PERSIST EVEN AFTER BROWSER RESTARTS.  HENCE,IT IS LESS SECURE!
+
+
 | Feature            | `sessionStorage`                       | `localStorage`                     |
 | ------------------ | -------------------------------------- | ---------------------------------- |
 | Persistence        | Only while the **browser tab** is open | **Forever** until manually cleared |
