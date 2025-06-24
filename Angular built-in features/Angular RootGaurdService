@@ -1,1 +1,77 @@
+## what the Angular RootGaurdService does ?
+
+Defining routes for navigation between components.
+Protecting routes using a RouteGuardService to allow access only if the user is logged in.
+
+RouteGaurdService Explanation:
+===================================
+@Injectable({ providedIn: 'root' })
+export class RouteGaurdService implements CanActivate {
+  constructor(private hardcodedAuthenticationService: HardcodedAuthenticationService) {}
+
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
+    if (this.hardcodedAuthenticationService.isUserLoggedIn())
+      return true;
+
+    return false;
+  }
+}
+
+This guard:
+
+Implements CanActivate, meaning it checks before navigation happens.
+
+Uses isUserLoggedIn() method from HardcodedAuthenticationService to check if a user is logged in.
+
+If true, it allows access to the route.
+
+If false, access is denied (and Angular won't load the component).
+
+AppRoutingModule Explanation:
+===================================
+const routes: Routes = [
+ { path: '', component: LoginComponent },
+ { path: 'login', component: LoginComponent },
+ { path: 'welcome/:name', component: WelcomeComponent, canActivate: [RouteGaurdService] },
+ { path: 'todos', component: ListTodosComponent, canActivate: [RouteGaurdService] },
+ { path: 'logout', component: LogoutComponent, canActivate: [RouteGaurdService] },
+ { path: '**', component: ErrorComponent }
+];
+
+What are You Achieving?
+You're protecting certain routes so only authenticated users can access them.
+Anyone trying to access /todos, /welcome/:name, or /logout directly without logging in will be blocked by the guard.
+
+This is your routing configuration:
+
+| Path              | Component            | Guard? | Description                          |
+| ----------------- | -------------------- | ------ | ------------------------------------ |
+| `''`              | `LoginComponent`     | No     | Default route (homepage)             |
+| `'login'`         | `LoginComponent`     | No     | Shows login form                     |
+| `'welcome/:name'` | `WelcomeComponent`   | ✅ Yes  | Only logged-in users can access      |
+| `'todos'`         | `ListTodosComponent` | ✅ Yes  | Protected list of to-dos             |
+| `'logout'`        | `LogoutComponent`    | ✅ Yes  | Protected logout screen              |
+| `'**'`            | `ErrorComponent`     | No     | Wildcard for invalid URLs (404 page) |
+
+What is CanActivate?
+
+CanActivate is an inbuilt Angular interface provided by the Angular Router module.
+CanActivate is part of Angular's route guard mechanism.
+It's used to control whether a route can be activated (navigated to) or not.
+
+How Does It Work?
+
+When you implement CanActivate in a service (like your RouteGaurdService), Angular will call the method canActivate() before navigating to the route.
+
+Your method should return:
+
+true → allow the navigation
+
+false → block the navigation
+
+OR it can return an Observable<boolean> or Promise<boolean> if it's asynchronous
+
+
+
+
 
