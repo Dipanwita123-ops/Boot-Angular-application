@@ -1,0 +1,64 @@
+You're building a full-stack Angular + Spring Boot project where the Angular frontend (running at http://localhost:4200) calls backend APIs (running at http://localhost:8080) to get data.
+
+Let me explain what is happening step-by-step in this flow — including the Observable part you're seeing.
+
+The CORS (Cross-Origin Resource Sharing) restriction is enforced by the browser itself, not by Angular or Spring Boot.
+
+✅ Which browser blocks the request?
+All modern web browsers enforce CORS for security. That includes:
+
+Google Chrome
+Mozilla Firefox
+Microsoft Edge
+ etc.
+
+⚠️ CORS enforcement is part of the browser's security model to prevent malicious JavaScript running on one site (like localhost:4200) from accessing resources on another (like localhost:8080) without permission.
+
+🔒 Why does the browser block it?
+By default, browsers do not allow JavaScript code from one origin to access resources from a different origin (domain + port + protocol). So:
+
+Angular runs on: http://localhost:4200
+
+Spring Boot runs on: http://localhost:8080
+
+These are considered different origins.
+
+So if you try to make an HTTP request from Angular to Spring Boot without CORS enabled, you'll get this error in the browser console:
+Access to XMLHttpRequest at 'http://localhost:8080/hello-world-bean' from origin 'http://localhost:4200' has been blocked by CORS policy
+
+How to Fix It?
+You already did the right thing in your Spring Boot controller:
+
+@CrossOrigin(origins = "http://localhost:4200")
+This tells Spring Boot:
+
+"It’s OK to accept HTTP requests coming from the Angular app at port 4200."
+If you were calling the backend from Postman, cURL, or a Java client, CORS would not be an issue — because CORS is only enforced by 
+browsers for JavaScript-based requests.
+
+| Question                    | Answer                                                               |
+| --------------------------- | -------------------------------------------------------------------- |
+| **Who blocks the request?** | The **browser** (Chrome, Firefox, etc.)                              |
+| **Why?**                    | Security — to prevent unauthorized cross-origin requests             |
+| **How to fix?**             | Use `@CrossOrigin(origins = "http://localhost:4200")` in Spring Boot |
+
+Quick Analogy:
+🏠 Host: The address of the office you're going to.
+
+🧑‍💼 Origin: The place you came from (e.g., your company).
+
+📜 Referer: The exact office room or desk you left when you came here.
+
+The office (Spring Boot) may have a policy:
+
+“Only people coming from Company A (localhost:4200) are allowed.”
+
+And that's why the origin matters most for CORS.
+
+Summary:
+
+| Header    | Meaning                              | Who sets it | Example                         |
+| --------- | ------------------------------------ | ----------- | ------------------------------- |
+| `Host`    | Target backend server                | Browser     | `localhost:8080`                |
+| `Origin`  | Where request *originated*           | Browser     | `http://localhost:4200`         |
+| `Referer` | Specific page that triggered request | Browser     | `http://localhost:4200/welcome` |
