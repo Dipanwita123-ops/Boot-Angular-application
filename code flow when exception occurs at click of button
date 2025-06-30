@@ -1,1 +1,216 @@
+Springboot Backend:
+
+package com.bootangularpjct.rest.webservices;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+//controller
+
+@CrossOrigin(origins = "http://localhost:4200")
+@RestController
+public class HelloWorldController {
+    
+	//GET
+	//URI - /hello-world
+	//method - ""Hello World"
+	
+	@RequestMapping(method = RequestMethod.GET , path = "/hello-world")
+	
+//	or use @GetMapping(path = "/hello-world")
+	
+	public String helloWorld() {
+		
+		return "Hello world" ;
+	}
+	
+//Returning a  bean object 
+	@GetMapping(path = "/hello-world-bean")
+		
+  public HelloWorldBean  helloWorldBean() {
+	
+		throw new RuntimeException("ERROR HAPPENED!!!");
+	//return new HelloWorldBean("Hello World Changed");
+		}
+	
+	//hello-world/path-variable/{name}=Dipanwita
+	
+	@GetMapping(path = "/hello-world/path-variable/{name}")
+	public HelloWorldBean helloWorldPathVariable(@PathVariable String name) {
+	    return new HelloWorldBean(String.format("Hello World , %s", name));
+	}
+}
+
+wlcome componentin Angular
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { WelcomeDataService } from '../service/data/welcome-data.service';
+
+@Component({
+  selector: 'app-welcome',
+  templateUrl: './welcome.component.html',
+  styleUrls: ['./welcome.component.css']
+})
+export class WelcomeComponent implements OnInit {
+
+
+  name: string = '';
+  welcomeMessageFromService: string = '';
+  errorMessageFromService: string = '';
+  messageType: 'success' | 'error' | '' = '';
+
+  //ActivatedRoute
+  constructor(
+    private route : ActivatedRoute,
+    private service : WelcomeDataService) { }
+
+  ngOnInit() {
+
+    //console.log(this.message)
+   // console.log(this.route.snapshot.params['name'])
+this.name = this.route.snapshot.params['name'] ;
+  }
+
+getWelcomeMessage() {
+  this.welcomeMessageFromService = '';
+    this.errorMessageFromService = '';
+    this.messageType = '';
+
+  this.service.executeHelloWorldBeanService().subscribe(
+    response => this.handleSuccessfulResponse(response),
+    error => this.handleErrorResponse(error)
+  );
+}
+
+handleSuccessfulResponse(response: any) {
+    this.welcomeMessageFromService = response.message;
+    this.messageType = 'success';
+  }
+
+handleErrorResponse(error: any) {
+    if (error.error && error.error.message) {
+      this.errorMessageFromService = error.error.message;
+    } else {
+      this.errorMessageFromService = 'An unexpected error occurred. ';
+    }
+     this.messageType = 'error';
+  }
+ 
+}
+welcome service :
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+
+export class WelcomeDataService {
+
+  constructor(
+    private http : HttpClient) { }
+
+  executeHelloWorldBeanService(){
+
+   return this.http.get('http://localhost:8080/hello-world-bean');
+  }
+
+
+}
+✅ Error Flow: Step-by-Step Breakdown
+🔹 1. User clicks "Get Welcome Message" button in Angular
+
+<button (click)="getWelcomeMessage()" class="btn btn-success"> Get Welcome Message</button>
+🔹 2. Angular triggers getWelcomeMessage() in WelcomeComponent
+
+getWelcomeMessage() {
+  this.welcomeMessageFromService = '';
+  this.errorMessageFromService = '';
+  this.messageType = '';
+
+  this.service.executeHelloWorldBeanService().subscribe(
+    response => this.handleSuccessfulResponse(response),
+    error => this.handleErrorResponse(error)
+  );
+}
+It calls the method in your Angular service:
+
+executeHelloWorldBeanService() {
+  return this.http.get('http://localhost:8080/hello-world-bean');
+}
+🔹 3. Angular sends HTTP GET to:
+
+http://localhost:8080/hello-world-bean
+🔹 4. Backend hits this method:
+
+@GetMapping(path = "/hello-world-bean")
+public HelloWorldBean helloWorldBean() {
+    throw new RuntimeException("ERROR HAPPENED!!!");
+}
+This throws an exception.
+
+🔹 5. Global exception handler catches it:
+
+@ControllerAdvice
+public class CustomResponseEntityExceptionHandler {
+
+    @ExceptionHandler(Exception.class)
+    public final ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex, WebRequest request) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    static class ErrorResponse {
+        private String message;
+        // Constructor + Getters/Setters
+    }
+}
+So backend responds with:
+
+
+{
+  "message": "ERROR HAPPENED!!!"
+}
+with status 500 INTERNAL SERVER ERROR.
+
+🔹 6. Angular receives the error response in handleErrorResponse()
+
+handleErrorResponse(error: any) {
+  if (error.error && error.error.message) {
+    this.errorMessageFromService = error.error.message; // <- This becomes "ERROR HAPPENED!!!"
+  } else {
+    this.errorMessageFromService = 'An unexpected error occurred.';
+  }
+  this.messageType = 'error';
+}
+Now:
+
+errorMessageFromService = "ERROR HAPPENED!!!"
+
+messageType = "error"
+
+🔹 7. Angular Template Displays Error
+
+<div class="container alert alert-danger" *ngIf="messageType === 'error'">
+  {{ errorMessageFromService }}
+</div>
+This block is rendered in red (as in your screenshot), showing:
+
+ERROR HAPPENED!!!
+
+SUMMARY:
+| Step | Description                                                     |
+| ---- | --------------------------------------------------------------- |
+| 1    | User clicks the button in UI                                    |
+| 2    | Angular sends GET request to Spring Boot                        |
+| 3    | Backend method throws exception                                 |
+| 4    | Global `@ControllerAdvice` formats the error as JSON            |
+| 5    | Angular receives the error object in `.subscribe(error => ...)` |
+| 6    | Error message is stored in component state                      |
+| 7    | Angular UI renders the message conditionally                    |
+
 
