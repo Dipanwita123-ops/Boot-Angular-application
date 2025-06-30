@@ -214,3 +214,10 @@ SUMMARY:
 | 7    | Angular UI renders the message conditionally                    |
 
 
+| Condition                                      | Meaning                                            | Result                                                            |
+| ---------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------- |
+| `error.error && error.error.message` is `true` | The backend sent a valid JSON error with `message` | Show backend message (e.g., `ERROR HAPPENED!!!`)                  |
+| `false` (e.g., backend down, no body)          | Something unexpected; no proper error message      | Show a generic fallback message (`An unexpected error occurred.`) |
+
+
+
