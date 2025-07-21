@@ -1,1 +1,100 @@
+Example 1: Synchronous authenticate()
+Imagine your HardcodedAuthenticationService looks like this:
+
+
+export class HardcodedAuthenticationService {
+  authenticate(username: string, password: string): boolean {
+    // just checks hardcoded values
+    if (username === 'admin' && password === 'dummy') {
+      return true;
+    }
+    return false;
+  }
+}
+In your component:
+
+if (this.hardcodedAuthenticationService.authenticate(this.username, this.password)) {
+  this.router.navigate(['welcome', this.username]); // navigate to welcome page
+  this.invalidLogin = false;
+} else {
+  this.invalidLogin = true;
+}
+✅ What happens here?
+
+The authenticate() method immediately returns true/false.
+
+No waiting. No server.
+
+So your code is synchronous. It executes step-by-step:
+
+Call authenticate().
+
+Get result (true/false).
+
+Run either navigate() or set invalidLogin = true.
+
+✅ This is fine for hardcoded values, but not for real backend APIs.
+
+🚀 Example 2: Asynchronous authenticate()
+Now imagine authenticate() makes a server call:
+
+
+export class HardcodedAuthenticationService {
+  constructor(private http: HttpClient) {}
+
+  authenticate(username: string, password: string): Observable<any> {
+    // Calls a backend API
+    return this.http.post('http://localhost:8080/authenticate', {
+      username,
+      password
+    });
+  }
+}
+In your component, if you write this:
+
+
+if (this.hardcodedAuthenticationService.authenticate(this.username, this.password)) {
+  this.router.navigate(['welcome', this.username]); 
+  this.invalidLogin = false;
+} else {
+  this.invalidLogin = true;
+}
+❌ This will NOT work!
+
+Why? Because authenticate() does not return true/false immediately.
+
+Instead, it returns an Observable that completes later, after the API responds.
+
+At the moment of the if, the API call is still running, so Angular has no result yet.
+
+✅ You must use subscribe() like this:
+
+
+this.hardcodedAuthenticationService.authenticate(this.username, this.password)
+  .subscribe({
+    next: (response) => {
+      // Success response
+      this.router.navigate(['welcome', this.username]);
+      this.invalidLogin = false;
+    },
+    error: (err) => {
+      // Error response
+      this.invalidLogin = true;
+    }
+  });
+Here:
+
+The API call is asynchronous.
+
+Your code waits for the backend response.
+
+subscribe() runs the success or error logic only after the API responds.
+
+💡 Key Difference
+
+| ✅ Synchronous (Example 1)             | ❌ Asynchronous (Example 2)                           |
+| ------------------------------------- | ---------------------------------------------------- |
+| `authenticate()` returns immediately. | `authenticate()` returns later (Observable/Promise). |
+| Works directly in `if(...)`.          | You must use `subscribe()` or `await`.               |
+| No backend/API call.                  | Involves backend/API call.                           |
 
