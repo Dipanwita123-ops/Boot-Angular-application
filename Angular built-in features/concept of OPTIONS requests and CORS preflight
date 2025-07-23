@@ -1,0 +1,90 @@
+Let’s break down what OPTIONS requests are, why they matter for CORS preflight, and look at a real example from Angular → Spring Boot.
+
+  What are OPTIONS requests?
+OPTIONS is an HTTP method used by browsers to ask the server:
+
+“What HTTP methods and headers are allowed on this resource?”
+
+This happens automatically in the browser whenever:
+
+A cross-origin HTTP request is made. (Your Angular app runs on http://localhost:4200, Spring Boot runs on http://localhost:8080, so it’s cross-origin.)
+
+And the request is not simple (more on this below 👇).
+
+This check is called a CORS Preflight Request.
+
+📦 Example: Angular → Spring Boot
+Suppose your Angular app sends a DELETE request to:
+
+
+http://localhost:8080/api/todos/1
+Before sending the actual DELETE, the browser sends an OPTIONS request like this:
+
+
+OPTIONS /api/todos/1 HTTP/1.1
+Host: localhost:8080
+Origin: http://localhost:4200
+Access-Control-Request-Method: DELETE
+Access-Control-Request-Headers: Content-Type, Authorization
+This is asking Spring Boot:
+
+“Hey server, are DELETE requests allowed from http://localhost:4200? And can I send custom headers like Authorization?”
+
+🔥 If Spring Boot responds:
+✅ Allowed
+
+
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: http://localhost:4200
+Access-Control-Allow-Methods: GET, POST, DELETE, PUT, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Authorization
+👉 Then the browser proceeds to send the actual DELETE request.
+
+❌ Denied
+If Spring Boot doesn’t allow it (no proper CORS config), the browser blocks the real request, and Angular never even reaches the server.
+
+🟠 Why does Spring Security need this line?
+
+.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+Spring Security applies filters to all requests, including OPTIONS.
+
+If you don’t explicitly allow OPTIONS, Spring Security:
+
+Intercepts the preflight request.
+
+Rejects it (401 Unauthorized or 403 Forbidden).
+
+The browser never sends the actual request.
+
+🧪 Example in Angular
+Angular HttpClient sends a POST:
+
+this.http.post('http://localhost:8080/api/todos', todoData).subscribe(...);
+If the POST includes:
+
+Authorization header (because of your interceptor)
+
+Or Content-Type: application/json
+
+➡️ Browser triggers a preflight OPTIONS first.
+
+ Simple Requests vs Preflighted Requests :
+
+| **Simple Requests**                                          | **Preflighted Requests**                         |
+| ------------------------------------------------------------ | ------------------------------------------------ |
+| GET, HEAD, POST (with basic content types like `text/plain`) | PUT, DELETE, PATCH, or POST with JSON            |
+| No custom headers                                            | Custom headers like `Authorization` or `X-Token` |
+| No preflight needed                                          | Browser sends `OPTIONS` first                    |
+
+  Your HTTP interceptor (adding Authorization) often makes Angular requests preflighted, because Authorization is a custom header.
+
+
+OPTIONS requests are browser-generated preflight checks for cross-origin requests.
+
+Spring Security needs:
+
+
+.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+…to let those preflight requests through, or Angular requests will fail before even hitting your controllers.
+
+
